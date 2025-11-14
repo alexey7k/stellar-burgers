@@ -1,15 +1,31 @@
-import { Preloader } from '@ui';
-import { FeedUI } from '@ui-pages';
-import { TOrder } from '@utils-types';
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
+import { Preloader } from '../../ui';
+import { FeedUI } from '../../ui/pages';
+import { useDispatch, useSelector } from '../../services/store';
+import { getFeeds } from '../../services/slices/feedSlice';
 
 export const Feed: FC = () => {
-  /** TODO: взять переменную из стора */
-  const orders: TOrder[] = [];
+  const dispatch = useDispatch();
+  const { orders, loading } = useSelector((state) => state.feed);
 
-  if (!orders.length) {
+  useEffect(() => {
+    // Запускаем WebSocket-ленту
+    dispatch({ type: 'feed/startFeed' });
+
+    return () => {
+      // Останавливаем WebSocket при размонтировании
+      dispatch({ type: 'feed/stopFeed' });
+    };
+  }, [dispatch]);
+
+  const handleGetFeeds = () => {
+    // Кнопка «Обновить» делает повторный запрос к API
+    dispatch(getFeeds());
+  };
+
+  if (loading) {
     return <Preloader />;
   }
 
-  <FeedUI orders={orders} handleGetFeeds={() => {}} />;
+  return <FeedUI orders={orders} handleGetFeeds={handleGetFeeds} />;
 };
