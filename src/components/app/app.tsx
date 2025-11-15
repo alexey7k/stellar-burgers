@@ -1,5 +1,6 @@
 import React, { FC, useEffect } from 'react';
 import { useLocation, Routes, Route, useNavigate } from 'react-router-dom';
+
 import styles from './app.module.css';
 import { AppHeader, Modal } from '@components';
 import {
@@ -16,7 +17,6 @@ import {
 import { IngredientDetails } from '../ingredient-details';
 import { OrderInfo } from '../order-info';
 import { ProtectedRoute } from '../ProtectedRoute';
-import { OnlyUnauthRoute } from '../OnlyUnauthRoute';
 import { useDispatch } from '../../services/store';
 import { checkUserAuth } from '../../services/slices/userSlice';
 import { fetchIngredients } from '../../services/slices/ingredientsSlice';
@@ -25,21 +25,37 @@ const App: FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const background = (location.state as any)?.background;
+
+  // фон для модальных маршрутов
+  const background = (location.state as { background?: Location } | null)
+    ?.background;
 
   useEffect(() => {
-    dispatch(fetchIngredients());
     dispatch(checkUserAuth());
+    dispatch(fetchIngredients());
   }, [dispatch]);
+
+  const handleModalClose = () => {
+    navigate(-1);
+  };
+
+  const getOrderModalTitle = () => {
+    const segments = location.pathname.split('/');
+    const number = segments[segments.length - 1];
+    return number ? `#${number}` : '';
+  };
 
   return (
     <div className={styles.app}>
       <AppHeader />
+
+      {/* Основные страницы (если есть background — рендерим его вместо текущего location) */}
       <Routes location={background || location}>
         <Route path='/' element={<ConstructorPage />} />
         <Route path='/feed' element={<Feed />} />
         <Route path='/feed/:number' element={<OrderInfo />} />
         <Route path='/ingredients/:id' element={<IngredientDetails />} />
+
         <Route
           path='/profile'
           element={
@@ -64,47 +80,50 @@ const App: FC = () => {
             </ProtectedRoute>
           }
         />
+
         <Route
           path='/login'
           element={
-            <OnlyUnauthRoute>
+            <ProtectedRoute onlyUnAuth>
               <Login />
-            </OnlyUnauthRoute>
+            </ProtectedRoute>
           }
         />
         <Route
           path='/register'
           element={
-            <OnlyUnauthRoute>
+            <ProtectedRoute onlyUnAuth>
               <Register />
-            </OnlyUnauthRoute>
+            </ProtectedRoute>
           }
         />
         <Route
           path='/forgot-password'
           element={
-            <OnlyUnauthRoute>
+            <ProtectedRoute onlyUnAuth>
               <ForgotPassword />
-            </OnlyUnauthRoute>
+            </ProtectedRoute>
           }
         />
         <Route
           path='/reset-password'
           element={
-            <OnlyUnauthRoute>
+            <ProtectedRoute onlyUnAuth>
               <ResetPassword />
-            </OnlyUnauthRoute>
+            </ProtectedRoute>
           }
         />
+
         <Route path='*' element={<NotFound404 />} />
       </Routes>
 
+      {/* Модальные маршруты поверх фона */}
       {background && (
         <Routes>
           <Route
             path='/feed/:number'
             element={
-              <Modal title='' onClose={() => navigate(-1)}>
+              <Modal title={getOrderModalTitle()} onClose={handleModalClose}>
                 <OrderInfo />
               </Modal>
             }
@@ -112,7 +131,7 @@ const App: FC = () => {
           <Route
             path='/ingredients/:id'
             element={
-              <Modal title='' onClose={() => navigate(-1)}>
+              <Modal title='Детали ингредиента' onClose={handleModalClose}>
                 <IngredientDetails />
               </Modal>
             }
@@ -120,9 +139,11 @@ const App: FC = () => {
           <Route
             path='/profile/orders/:number'
             element={
-              <Modal title='' onClose={() => navigate(-1)}>
-                <OrderInfo />
-              </Modal>
+              <ProtectedRoute>
+                <Modal title={getOrderModalTitle()} onClose={handleModalClose}>
+                  <OrderInfo />
+                </Modal>
+              </ProtectedRoute>
             }
           />
         </Routes>
