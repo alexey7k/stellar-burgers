@@ -18,7 +18,6 @@ export const BurgerConstructorUI: FC<BurgerConstructorUIProps> = ({
   onOrderClick,
   closeOrderModal
 }) => {
-  // Добавляем безопасные значения по умолчанию
   const safeConstructorItems = {
     bun: constructorItems?.bun || null,
     ingredients: constructorItems?.ingredients || []

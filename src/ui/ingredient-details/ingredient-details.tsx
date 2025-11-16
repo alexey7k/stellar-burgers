@@ -15,11 +15,6 @@ export const IngredientDetailsUI: FC<IngredientDetailsUIProps> = ({
   if (!ingredient) {
     return (
       <div className={styles.container}>
-        {showTitleInBody && (
-          <h2 className={`${styles.title} text text_type_main-large`}>
-            Детали ингредиента
-          </h2>
-        )}
         <p className={styles.notFound}>Ингредиент не найден</p>
       </div>
     );
@@ -30,12 +25,9 @@ export const IngredientDetailsUI: FC<IngredientDetailsUIProps> = ({
 
   return (
     <div className={styles.content}>
-      {showTitleInBody && (
-        <h2 className='text text_type_main-large'>Детали ингредиента</h2>
-      )}
       <img
         className={styles.img}
-        alt='изображение ингредиента.'
+        alt='изображение ингредиента'
         src={image_large}
       />
       <h3 className='text text_type_main-medium mt-2 mb-4'>{name}</h3>
