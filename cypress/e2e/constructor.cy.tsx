@@ -24,12 +24,22 @@ describe('Страница конструктора бургера', () => {
 
     cy.wait('@getIngredients');
 
-    // Находим карточку булки и жмём "Добавить"
-    cy.contains('li', BUN_NAME).within(() => {
-      cy.contains('button', 'Добавить').click();
-    });
+    // Находим карточку булки по data-cy и тексту
+    cy.contains('[data-cy="ingredient-card"]', BUN_NAME).as('bunCard');
 
-    // Минимальная проверка: кнопка "Оформить заказ" существует (страница отрисована)
+    // Жмём на кнопку "Добавить" внутри этой карточки
+    cy.get('@bunCard')
+      .find('button')
+      .contains('Добавить')
+      .click();
+
+    // Явно проверяем, что ингредиент добавлен:
+    // на карточке появился счётчик
+    cy.get('@bunCard')
+      .find('[data-cy="ingredient-counter"]')
+      .should('exist');
+
+    // Дополнительно: страница конструктора отрисована
     cy.contains('button', 'Оформить заказ').should('exist');
   });
 
@@ -38,9 +48,11 @@ describe('Страница конструктора бургера', () => {
 
     cy.wait('@getIngredients');
 
-    // Открываем модалку по клику на карточку ингредиента
-    cy.contains('li', BUN_NAME)
-      .find('a')
+    // Открываем модалку по клику на ссылку ингредиента
+    cy.contains('[data-cy="ingredient-card"]', BUN_NAME).as('bunCard');
+
+    cy.get('@bunCard')
+      .find('[data-cy="ingredient-link"]')
       .click();
 
     // Мы на странице/в модалке детали ингредиента
@@ -48,8 +60,6 @@ describe('Страница конструктора бургера', () => {
     cy.contains(BUN_NAME).should('exist');
 
     // --- Закрытие по крестику ---
-    // Ищем заголовок модалки "Детали ингредиента",
-    // поднимаемся к родителю (header) и кликаем по кнопке внутри
     cy.contains('h3', 'Детали ингредиента')
       .parent()
       .find('button[type="button"]')
@@ -59,8 +69,10 @@ describe('Страница конструктора бургера', () => {
     cy.url().should('eq', `${Cypress.config('baseUrl')}/`);
 
     // --- Снова открываем модалку ---
-    cy.contains('li', BUN_NAME)
-      .find('a')
+    cy.contains('[data-cy="ingredient-card"]', BUN_NAME).as('bunCardAgain');
+
+    cy.get('@bunCardAgain')
+      .find('[data-cy="ingredient-link"]')
       .click();
 
     cy.url().should('include', '/ingredients/');
@@ -95,16 +107,22 @@ describe('Страница конструктора бургера', () => {
     cy.wait('@getUser');
 
     // Добавляем булку
-    cy.contains('li', BUN_NAME).within(() => {
-      cy.contains('button', 'Добавить').click();
-    });
+    cy.contains('[data-cy="ingredient-card"]', BUN_NAME).as('bunCard');
+
+    cy.get('@bunCard')
+      .find('button')
+      .contains('Добавить')
+      .click();
 
     // Переключаемся на "Начинки" и добавляем начинку
     cy.contains('Начинки').click();
 
-    cy.contains('li', MAIN_NAME).within(() => {
-      cy.contains('button', 'Добавить').click();
-    });
+    cy.contains('[data-cy="ingredient-card"]', MAIN_NAME).as('mainCard');
+
+    cy.get('@mainCard')
+      .find('button')
+      .contains('Добавить')
+      .click();
 
     // Кликаем по кнопке «Оформить заказ»
     cy.contains('button', 'Оформить заказ').click();
@@ -120,13 +138,13 @@ describe('Страница конструктора бургера', () => {
 
     // --- Проверяем, что конструктор пуст ---
     // После успешного заказа ингредиенты должны быть очищены,
-    // а счётчики на карточках обнулены (компонент Counter перестаёт рендериться)
-    cy.contains('li', BUN_NAME).within(() => {
-      cy.get('[class*="counter"]').should('not.exist');
+    // а счётчики на карточках обнулены
+    cy.contains('[data-cy="ingredient-card"]', BUN_NAME).within(() => {
+      cy.get('[data-cy="ingredient-counter"]').should('not.exist');
     });
 
-    cy.contains('li', MAIN_NAME).within(() => {
-      cy.get('[class*="counter"]').should('not.exist');
+    cy.contains('[data-cy="ingredient-card"]', MAIN_NAME).within(() => {
+      cy.get('[data-cy="ingredient-counter"]').should('not.exist');
     });
   });
 });

@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/15</span>
+                <span class='fraction'>0/14</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/21</span>
+                <span class='fraction'>0/5</span>
             </div>
         
             
@@ -91,14 +91,11 @@
 <a name='L26'></a><a href='#L26'>26</a>
 <a name='L27'></a><a href='#L27'>27</a>
 <a name='L28'></a><a href='#L28'>28</a>
-<a name='L29'></a><a href='#L29'>29</a>
-<a name='L30'></a><a href='#L30'>30</a>
-<a name='L31'></a><a href='#L31'>31</a>
-<a name='L32'></a><a href='#L32'>32</a>
-<a name='L33'></a><a href='#L33'>33</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L29'></a><a href='#L29'>29</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -109,18 +106,13 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -132,6 +124,7 @@
 <span class="cstat-no" title="statement not covered" >import { useSelector } from '../../services/store';</span>
 <span class="cstat-no" title="statement not covered" >import { IngredientDetailsUI } from '../../ui';</span>
 import { TIngredient } from '@utils-types';
+import type { RootState } from '../../services/store';
 &nbsp;
 type RouteParams = {
   id?: string;
@@ -140,21 +133,16 @@ type RouteParams = {
 export const <span class="cstat-no" title="statement not covered" >IngredientDetails: FC = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(</span>) =&gt; {</span></span>
   const { id } = <span class="cstat-no" title="statement not covered" >useParams&lt;RouteParams&gt;();</span>
 &nbsp;
-  const ingredient = <span class="cstat-no" title="statement not covered" >useSelector(<span class="fstat-no" title="function not covered" >(s</span>tate) =&gt; {</span>
-    // Слайс ингредиентов может называться по-разному,
-    // поэтому аккуратно достаём список через any.
-    const slice: any = (<span class="cstat-no" title="statement not covered" >state as any).ingredients;</span>
+  const ingredient = <span class="cstat-no" title="statement not covered" >useSelector(<span class="fstat-no" title="function not covered" >(s</span>tate: RootState): TIngredient | null =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (!id) {</span>
+<span class="cstat-no" title="statement not covered" >      return null;</span>
+    }
 &nbsp;
-    const list: TIngredient[] =
-<span class="cstat-no" title="statement not covered" >      slice?.data || slice?.items || slice?.ingredients || [];</span>
+    const { items } = <span class="cstat-no" title="statement not covered" >state.ingredients;</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (!id) <span class="cstat-no" title="statement not covered" >return null;</span></span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >    return list.find(<span class="fstat-no" title="function not covered" >(i</span>tem) =&gt; <span class="cstat-no" title="statement not covered" >item._id === id) </span>?? null;</span>
+<span class="cstat-no" title="statement not covered" >    return items.find(<span class="fstat-no" title="function not covered" >(i</span>tem) =&gt; <span class="cstat-no" title="statement not covered" >item._id === id) </span>?? null;</span>
   });
 &nbsp;
-  // Весь рендер отдаём на UI-компонент, туда всегда передаём
-  // либо ингредиент, либо null — внутри UI уже есть защита.
 <span class="cstat-no" title="statement not covered" >  return &lt;IngredientDetailsUI ingredient={ingredient} /&gt;;</span>
 };
 &nbsp;
@@ -166,7 +154,7 @@ export const <span class="cstat-no" title="statement not covered" >IngredientDet
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-23T16:23:57.433Z
+                at 2025-11-24T16:02:41.260Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

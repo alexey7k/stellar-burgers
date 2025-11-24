@@ -17,8 +17,8 @@ const mockIngredients = [
   },
   {
     _id: '2',
-    name: 'Тестовый соус',
-    type: 'sauce' as const,
+    name: 'Тестовая начинка',
+    type: 'main' as const,
     proteins: 5,
     fat: 10,
     carbohydrates: 15,
@@ -32,41 +32,41 @@ const mockIngredients = [
 ];
 
 describe('ingredientsSlice reducer', () => {
-  it('ставит флаг загрузки в true при fetchIngredients.pending', () => {
+  it('ставит loading в true при fetchIngredients.pending', () => {
     const state = ingredientsReducer(undefined, {
       type: fetchIngredients.pending.type
-    } as any);
+    });
 
     expect(state.loading).toBe(true);
     expect(state.error).toBeUndefined();
   });
 
-  it('сохраняет данные и сбрасывает флаг загрузки при fetchIngredients.fulfilled', () => {
+  it('заполняет items и сбрасывает loading при fetchIngredients.fulfilled', () => {
     const loadingState = ingredientsReducer(undefined, {
       type: fetchIngredients.pending.type
-    } as any);
+    });
 
     const state = ingredientsReducer(loadingState, {
       type: fetchIngredients.fulfilled.type,
       payload: mockIngredients
-    } as any);
+    });
 
     expect(state.loading).toBe(false);
     expect(state.items).toEqual(mockIngredients);
     expect(state.error).toBeUndefined();
   });
 
-  it('сохраняет ошибку и сбрасывает флаг загрузки при fetchIngredients.rejected', () => {
+  it('сохраняет ошибку и сбрасывает loading при fetchIngredients.rejected', () => {
     const loadingState = ingredientsReducer(undefined, {
       type: fetchIngredients.pending.type
-    } as any);
+    });
 
     const errorMessage = 'Failed to load ingredients';
 
     const state = ingredientsReducer(loadingState, {
       type: fetchIngredients.rejected.type,
       error: { message: errorMessage }
-    } as any);
+    });
 
     expect(state.loading).toBe(false);
     expect(state.error).toBe(errorMessage);

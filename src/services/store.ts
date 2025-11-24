@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
+import type { Middleware } from '@reduxjs/toolkit';
 import { rootReducer } from './rootReducer';
 import {
   TypedUseSelectorHook,
@@ -13,21 +14,47 @@ const WS_BASE_URL = process.env.BURGER_API_URL
 
 let socket: WebSocket | null = null;
 
-const socketMiddleware = (store: any) => (next: any) => (action: any) => {
+// Экшены, с которыми умеет работать socketMiddleware
+type ActionWithType = {
+  type: string;
+};
+
+// Type guard: сузить unknown до объекта с полем type
+const isActionWithType = (action: unknown): action is ActionWithType =>
+  typeof action === 'object' &&
+  action !== null &&
+  'type' in action &&
+  typeof (action as { type: unknown }).type === 'string';
+
+const socketMiddleware: Middleware = (store) => (next) => (action) => {
+  // Если это не redux-экшен с полем type — просто пробрасываем дальше
+  if (!isActionWithType(action)) {
+    return next(action);
+  }
+
   if (action.type === 'feed/startFeed') {
     // Открываем WS для общей ленты
-    if (socket) socket.close();
+    if (socket) {
+      socket.close();
+    }
+
     socket = new WebSocket(`${WS_BASE_URL}/all`);
+
     socket.onmessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
       store.dispatch({ type: 'feed/setFeedData', payload: data });
     };
   } else if (action.type === 'order/startUserFeed') {
     // Открываем WS для ленты заказов пользователя
-    if (socket) socket.close();
+    if (socket) {
+      socket.close();
+    }
+
     const token = getCookie('accessToken');
     const accessToken = token ? token.replace('Bearer ', '') : '';
+
     socket = new WebSocket(`${WS_BASE_URL}?token=${accessToken}`);
+
     socket.onmessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
       store.dispatch({ type: 'order/setUserOrders', payload: data });
@@ -42,6 +69,7 @@ const socketMiddleware = (store: any) => (next: any) => (action: any) => {
       socket = null;
     }
   }
+
   return next(action);
 };
 

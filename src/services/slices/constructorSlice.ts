@@ -36,12 +36,34 @@ const constructorSlice = createSlice({
       );
     },
     // Перемещение ингредиента внутри списка (перетаскивание)
+    // moveIngredient: (
+    //   state,
+    //   action: PayloadAction<{ from: number; to: number }>
+    // ) => {
+    //   const { from, to } = action.payload;
+    //   const ingredients = [...state.ingredients];
+    //   const [movedItem] = ingredients.splice(from, 1);
+    //   ingredients.splice(to, 0, movedItem);
+    //   state.ingredients = ingredients;
+    // },
     moveIngredient: (
       state,
       action: PayloadAction<{ from: number; to: number }>
     ) => {
       const { from, to } = action.payload;
       const ingredients = [...state.ingredients];
+
+      // Защита от некорректных индексов: если что-то не так — выходим,
+      // не меняя состояние
+      if (
+        from < 0 ||
+        from >= ingredients.length ||
+        to < 0 ||
+        to >= ingredients.length
+      ) {
+        return;
+      }
+
       const [movedItem] = ingredients.splice(from, 1);
       ingredients.splice(to, 0, movedItem);
       state.ingredients = ingredients;

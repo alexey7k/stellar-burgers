@@ -1,14 +1,16 @@
 import { rootReducer } from './rootReducer';
-import ingredientsReducer from './slices/ingredientsSlice';
 import constructorReducer from './slices/constructorSlice';
+import ingredientsReducer from './slices/ingredientsSlice';
 import orderReducer from './slices/orderSlice';
 import userReducer from './slices/userSlice';
 import feedReducer from './slices/feedSlice';
 
 describe('rootReducer', () => {
-  it('инициализирует стор с ожидаемой структурой', () => {
-    const state = rootReducer(undefined, { type: '@@INIT' } as any);
+  it('возвращает корректное начальное состояние для неизвестного экшена', () => {
+    const initialState = rootReducer(undefined, { type: '@@INIT' });
+    const state = rootReducer(undefined, { type: 'UNKNOWN_ACTION' });
 
+    expect(state).toEqual(initialState);
     expect(state).toHaveProperty('ingredients');
     expect(state).toHaveProperty('constructorBurger');
     expect(state).toHaveProperty('order');
@@ -17,7 +19,7 @@ describe('rootReducer', () => {
   });
 
   it('инициализирует срезы теми же начальными стейтами, что и их редьюсеры', () => {
-    const initAction = { type: '@@INIT' } as any;
+    const initAction = { type: '@@INIT' };
 
     const rootState = rootReducer(undefined, initAction);
 

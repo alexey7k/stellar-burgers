@@ -1,14 +1,21 @@
 import { FC } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, type Location } from 'react-router-dom';
 import styles from './ingredient-details.module.css';
 import { IngredientDetailsUIProps } from './type';
+
+type IngredientLocationState = {
+  background?: Location;
+};
 
 export const IngredientDetailsUI: FC<IngredientDetailsUIProps> = ({
   ingredient
 }) => {
-  const location = useLocation();
+  const location = useLocation() as Location & {
+    state: IngredientLocationState | null;
+  };
+
   // Если есть background в location.state — значит компонент рендерится в модалке.
-  const isModal = Boolean((location.state as any)?.background);
+  const isModal = Boolean(location.state?.background);
   // В модалке заголовок отображается в шапке Modal, внутри контента не показываем.
   const showTitleInBody = !isModal;
 

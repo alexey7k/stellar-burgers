@@ -4,6 +4,8 @@ import constructorReducer, {
   moveIngredient
 } from './constructorSlice';
 
+type ConstructorState = ReturnType<typeof constructorReducer>;
+
 const baseIngredient = {
   _id: '1',
   name: 'Тестовый ингредиент',
@@ -20,19 +22,19 @@ const baseIngredient = {
 };
 
 describe('constructorSlice reducer', () => {
-  it('обрабатывает добавление ингредиента (addIngredient)', () => {
-    const action = addIngredient(baseIngredient);
-
-    const state = constructorReducer(undefined, action);
+  it('добавляет ингредиент в конструктор', () => {
+    const state: ConstructorState = constructorReducer(
+      undefined,
+      addIngredient(baseIngredient)
+    );
 
     expect(state.ingredients).toHaveLength(1);
     expect(state.ingredients[0]._id).toBe(baseIngredient._id);
-    // в конструкторе ингредиент получает уникальный id
     expect(state.ingredients[0].id).toBeDefined();
   });
 
-  it('обрабатывает удаление ингредиента (removeIngredient)', () => {
-    const initialState = {
+  it('удаляет ингредиент по id', () => {
+    const initialState: ConstructorState = {
       bun: null,
       ingredients: [
         { ...baseIngredient, id: 'first' },
@@ -40,15 +42,14 @@ describe('constructorSlice reducer', () => {
       ]
     };
 
-    const action = removeIngredient('first');
-    const state = constructorReducer(initialState as any, action);
+    const state = constructorReducer(initialState, removeIngredient('first'));
 
     expect(state.ingredients).toHaveLength(1);
     expect(state.ingredients[0].id).toBe('second');
   });
 
-  it('обрабатывает изменение порядка ингредиентов (moveIngredient)', () => {
-    const initialState = {
+  it('меняет порядок ингредиентов в списке начинки', () => {
+    const initialState: ConstructorState = {
       bun: null,
       ingredients: [
         { ...baseIngredient, id: 'first' },
@@ -57,10 +58,48 @@ describe('constructorSlice reducer', () => {
       ]
     };
 
-    const action = moveIngredient({ from: 0, to: 2 });
-    const state = constructorReducer(initialState as any, action);
+    const state = constructorReducer(
+      initialState,
+      moveIngredient({ from: 0, to: 2 })
+    );
 
-    const idsOrder = state.ingredients.map((item: any) => item.id);
+    const idsOrder = state.ingredients.map((item) => item.id);
     expect(idsOrder).toEqual(['second', 'third', 'first']);
   });
+  it('не меняет состояние при удалении ингредиента из пустого конструктора', () => {
+    // начальное состояние редьюсера
+    const initialState: ConstructorState = constructorReducer(undefined, {
+      type: '@@INIT'
+    });
+
+    const state = constructorReducer(
+      initialState,
+      removeIngredient('non-existent-id')
+    );
+
+    expect(state).toEqual(initialState);
+  });
+
+  it(
+    'не изменяет порядок ингредиентов при попытке ' +
+      'перемещения с некорректными индексами',
+    () => {
+      const initialState: ConstructorState = {
+        bun: null,
+        ingredients: [
+          { ...baseIngredient, id: 'first' },
+          { ...baseIngredient, id: 'second' },
+          { ...baseIngredient, id: 'third' }
+        ]
+      };
+
+      const state = constructorReducer(
+        initialState,
+        // заведомо некорректный индекс from
+        moveIngredient({ from: 10, to: 0 })
+      );
+
+      expect(state).toEqual(initialState);
+    }
+  );
 });
