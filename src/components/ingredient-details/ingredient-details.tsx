@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useSelector } from '../../services/store';
 import { IngredientDetailsUI } from '../../ui';
 import { TIngredient } from '@utils-types';
+import type { RootState } from '../../services/store';
 
 type RouteParams = {
   id?: string;
@@ -11,21 +12,16 @@ type RouteParams = {
 export const IngredientDetails: FC = () => {
   const { id } = useParams<RouteParams>();
 
-  const ingredient = useSelector((state) => {
-    // Слайс ингредиентов может называться по-разному,
-    // поэтому аккуратно достаём список через any.
-    const slice: any = (state as any).ingredients;
+  const ingredient = useSelector((state: RootState): TIngredient | null => {
+    if (!id) {
+      return null;
+    }
 
-    const list: TIngredient[] =
-      slice?.data || slice?.items || slice?.ingredients || [];
+    const { items } = state.ingredients;
 
-    if (!id) return null;
-
-    return list.find((item) => item._id === id) ?? null;
+    return items.find((item) => item._id === id) ?? null;
   });
 
-  // Весь рендер отдаём на UI-компонент, туда всегда передаём
-  // либо ингредиент, либо null — внутри UI уже есть защита.
   return <IngredientDetailsUI ingredient={ingredient} />;
 };
 
